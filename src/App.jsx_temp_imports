@@ -1,0 +1,23 @@
+import React, { useState } from 'react';
+import {
+  Activity,
+  Brain,
+  ClipboardList,
+  Upload,
+  Search,
+  ShieldCheck,
+  TrendingUp,
+  HeartPulse,
+  User,
+  CheckCircle2,
+  AlertCircle,
+  FileSearch,
+  ChevronRight,
+  Info,
+  Database,
+  Dna,
+  Eye,
+  Github
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
