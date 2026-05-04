@@ -72,10 +72,66 @@ const App = () => {
     ADL: 2.0,
     Disorientation: 0
   });
+  const [errors, setErrors] = useState({});
+
+  const FIELD_DESCRIPTIONS = {
+    Age: "Âge du patient (60-110 ans recommandé).",
+    EducationLevel: "Niveau d'études (0: Aucun, 1: Primaire, 2: Secondaire, 3: Supérieur).",
+    Smoking: "Statut tabagique actuel (0: Non-fumeur, 1: Fumeur).",
+    SleepQuality: "Qualité du sommeil sur une échelle de 0 (nulle) à 10 (excellente).",
+    CardiovascularDisease: "Présence de maladies cardiovasculaires (0: Non, 1: Oui).",
+    HeadInjury: "Historique de traumatisme crânien (0: Non, 1: Oui).",
+    Hypertension: "Présence d'hypertension artérielle (0: Non, 1: Oui).",
+    CholesterolLDL: "Taux de cholestérol LDL en mg/dL (Valeur typique: 70-190).",
+    CholesterolHDL: "Taux de cholestérol HDL en mg/dL (Valeur typique: 20-100).",
+    CholesterolTriglycerides: "Taux de triglycérides en mg/dL (Valeur typique: 50-400).",
+    MMSE: "Score Mini-Mental State Exam (0-30). Un score < 24 suggère un déclin cognitif.",
+    FunctionalAssessment: "Évaluation des capacités fonctionnelles (0-10).",
+    MemoryComplaints: "Plaintes subjectives de mémoire (0: Non, 1: Oui).",
+    BehavioralProblems: "Présence de troubles du comportement (0: Non, 1: Oui).",
+    ADL: "Activités de la vie quotidienne (Activities of Daily Living) (0-10).",
+    Disorientation: "Signes de désorientation spatio-temporelle (0: Non, 1: Oui)."
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Check for empty fields (don't let him skip)
+    Object.keys(formData).forEach(key => {
+      if (formData[key] === "" || formData[key] === null || formData[key] === undefined) {
+        newErrors[key] = "Champ requis.";
+      }
+    });
+
+    if (formData.Age !== "" && (formData.Age < 20 || formData.Age > 120)) newErrors.Age = "Âge invalide (20-120).";
+    if (formData.SleepQuality !== "" && (formData.SleepQuality < 0 || formData.SleepQuality > 10)) newErrors.SleepQuality = "0-10 uniquement.";
+    if (formData.MMSE !== "" && (formData.MMSE < 0 || formData.MMSE > 30)) newErrors.MMSE = "0-30 uniquement.";
+    if (formData.FunctionalAssessment !== "" && (formData.FunctionalAssessment < 0 || formData.FunctionalAssessment > 10)) newErrors.FunctionalAssessment = "0-10 uniquement.";
+    if (formData.ADL !== "" && (formData.ADL < 0 || formData.ADL > 10)) newErrors.ADL = "0-10 uniquement.";
+    
+    // Binary fields
+    ['Smoking', 'CardiovascularDisease', 'HeadInjury', 'Hypertension', 'MemoryComplaints', 'BehavioralProblems', 'Disorientation'].forEach(key => {
+      if (formData[key] !== "" && formData[key] !== 0 && formData[key] !== 1) newErrors[key] = "0 ou 1 uniquement.";
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
+    // Allow empty string to let user clear the field, otherwise parse float
+    const val = value === "" ? "" : parseFloat(value);
+    setFormData(prev => ({ ...prev, [name]: val }));
+    
+    // Clear error for this field as they type
+    if (errors[name]) {
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   const handleFileChange = (e) => {
@@ -140,6 +196,7 @@ const App = () => {
   };
 
   const runClinicalPrediction = async () => {
+    if (!validateForm()) return;
     setLoading(true);
     try {
       const res = await axios.post(`${API_BASE}/predict-clinical`, formData);
@@ -149,6 +206,7 @@ const App = () => {
   };
 
   const runRecommendation = async () => {
+    if (!validateForm()) return;
     setLoading(true);
     try {
       const res = await axios.post(`${API_BASE}/recommend-care`, formData);
@@ -340,7 +398,24 @@ const App = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                     <div style={{ gridColumn: 'span 3', borderBottom: '1px solid #ffffff', paddingBottom: '0.5rem' }}><span style={{ fontSize: '0.75rem', fontWeight: 700 }}>Biomarkers & Vitals</span></div>
                     {Object.keys(formData).map(key => (
-                      <div key={key}><label style={{ fontSize: '0.7rem', color: '#a1a1aa' }}>{key}</label><input name={key} type="number" className="input-field" value={formData[key]} onChange={handleInputChange} /></div>
+                      <div key={key} style={{ position: 'relative' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.2rem' }}>
+                          <label style={{ fontSize: '0.7rem', color: errors[key] ? '#ef4444' : '#a1a1aa', fontWeight: 600 }}>{key}</label>
+                          <div className="tooltip-container">
+                            <Info size={12} color="#52525b" />
+                            <span className="tooltip-text">{FIELD_DESCRIPTIONS[key]}</span>
+                          </div>
+                        </div>
+                        <input 
+                          name={key} 
+                          type="number" 
+                          className={`input-field ${errors[key] ? 'error' : ''}`} 
+                          style={{ marginTop: 0, borderColor: errors[key] ? '#ef4444' : '#ffffff' }}
+                          value={formData[key]} 
+                          onChange={handleInputChange} 
+                        />
+                        {errors[key] && <p style={{ fontSize: '0.6rem', color: '#ef4444', marginTop: '0.2rem' }}>{errors[key]}</p>}
+                      </div>
                     ))}
                   </div>
                   <button className="btn btn-primary" style={{ width: '100%', marginTop: '1.5rem' }} onClick={runClinicalPrediction} disabled={loading}>{loading ? "Predicting..." : "Analyze Clinical Risk"}</button>
