@@ -276,9 +276,49 @@ const App = () => {
                         <span>Confiance</span>
                         <span className="badge badge-success">{(mriResult.confidence * 100).toFixed(1)}%</span>
                       </div>
-                      <div style={{ background: '#333', height: '8px', marginTop: '1rem' }}>
+                      <div style={{ background: '#333', height: '8px', marginTop: '1rem', marginBottom: '2.5rem' }}>
                         <motion.div initial={{ width: 0 }} animate={{ width: `${mriResult.confidence * 100}%` }} transition={{ duration: 1 }} style={{ height: '100%', background: '#ffffff' }} />
                       </div>
+
+                      {mriResult.details && (
+                        <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #ffffff' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                            {mriResult.details.Status === "Agreement" ? (
+                              <CheckCircle2 size={24} color="#ffffff" />
+                            ) : (
+                              <AlertCircle size={24} color="#ffffff" />
+                            )}
+                            <span style={{ fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                              {mriResult.details.Status === "Agreement" ? "Consensus Modèles : Accord" : "Consensus Modèles : Divergence"}
+                            </span>
+                          </div>
+                          
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                             <div className="glass-panel" style={{ padding: '1rem', border: '1px solid #333' }}>
+                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                 <p style={{ fontSize: '0.65rem', color: '#a1a1aa', fontWeight: 700 }}>MODÈLE A (RESNET50)</p>
+                                 <span style={{ fontSize: '0.7rem', border: '1px solid #333', padding: '2px 6px', fontWeight: 700 }}>
+                                   {mriResult.details["Primary Confidence"] ? (mriResult.details["Primary Confidence"] * 100).toFixed(1) : "0"}%
+                                 </span>
+                               </div>
+                               <p style={{ fontSize: '0.9rem', fontWeight: 600 }}>{mriResult.details["Primary (ResNet50)"]}</p>
+                             </div>
+                             <div className="glass-panel" style={{ padding: '1rem', border: '1px solid #333' }}>
+                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                 <p style={{ fontSize: '0.65rem', color: '#a1a1aa', fontWeight: 700 }}>MODÈLE B (CUSTOM CNN)</p>
+                                 <span style={{ fontSize: '0.7rem', border: '1px solid #333', padding: '2px 6px', fontWeight: 700 }}>
+                                   {mriResult.details["Secondary Confidence"] ? (mriResult.details["Secondary Confidence"] * 100).toFixed(1) : "0"}%
+                                 </span>
+                               </div>
+                               <p style={{ fontSize: '0.9rem', fontWeight: 600 }}>{mriResult.details["Secondary (Custom CNN)"]}</p>
+                             </div>
+                          </div>
+                          
+                          <p style={{ fontSize: '0.7rem', color: '#52525b', marginTop: '1.5rem', fontStyle: 'italic' }}>
+                            *Le diagnostic final est basé sur le modèle ResNet50 (A). La divergence indique une ambiguïté structurelle mineure dans l'image analysée.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div style={{ textAlign: 'center', padding: '4rem 0', color: '#a1a1aa' }}>
