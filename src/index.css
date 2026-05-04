@@ -145,3 +145,28 @@ body {
   .main-content { margin-left: 0; padding: 2rem; }
   .grid-2 { grid-template-columns: 1fr; }
 }
+
+/* Custom Scrollbar for example gallery */
+div::-webkit-scrollbar {
+  height: 4px;
+}
+
+div::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+div::-webkit-scrollbar-thumb {
+  background: #333;
+}
+
+div::-webkit-scrollbar-thumb:hover {
+  background: #ffffff;
+}
+
+.example-item-img {
+  transition: transform 0.3s ease;
+}
+
+.example-item-img:hover {
+  transform: scale(1.1);
+}

@@ -32,6 +32,27 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [mriFile, setMriFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const examples = [
+    { name: 'Démence Légère', path: '/img/MildDemented.jpg' },
+    { name: 'Démence Modérée', path: '/img/ModerateDemented.jpg' },
+    { name: 'Non Dément', path: '/img/NonDemented.jpg' },
+    { name: 'Démence Très Légère', path: '/img/VeryMildDemented.jpg' }
+  ];
+
+  const diagnosisMap = {
+    'MildDemented': 'Démence Légère',
+    'ModerateDemented': 'Démence Modérée',
+    'NonDemented': 'Non Dément',
+    'VeryMildDemented': 'Démence Très Légère',
+    'Mild': 'Démence Légère',
+    'Moderate': 'Démence Modérée',
+    'Non': 'Non Dément',
+    'Very Mild': 'Démence Très Légère'
+  };
+
+  const translateDiagnosis = (diag) => diagnosisMap[diag.replace(/\s+/g, '')] || diagnosisMap[diag] || diag;
 
   const [formData, setFormData] = useState({
     Age: 75,
@@ -58,8 +79,49 @@ const App = () => {
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files ? e.target.files[0] : null;
     if (file) {
+      setMriFile(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleExampleSelect = async (path) => {
+    setLoading(true);
+    try {
+      const response = await fetch(path);
+      const blob = await response.blob();
+      const filename = path.split('/').pop();
+      const file = new File([blob], filename, { type: 'image/jpeg' });
+      setMriFile(file);
+      setPreview(path);
+    } catch (err) {
+      console.error("Error loading example:", err);
+    }
+    setLoading(false);
+  };
+
+  const onDragStart = (e, path) => {
+    e.dataTransfer.setData("examplePath", path);
+  };
+
+  const onDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const onDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const onDrop = async (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const path = e.dataTransfer.getData("examplePath");
+    if (path) {
+      handleExampleSelect(path);
+    } else if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
       setMriFile(file);
       setPreview(URL.createObjectURL(file));
     }
@@ -137,33 +199,81 @@ const App = () => {
         <AnimatePresence mode="wait">
           {activeTab === 'mri' && (
             <motion.div key="mri" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-              <h1 className="font-heading" style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>MRI Structural Analysis</h1>
+              <h1 className="font-heading" style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>Analyse Structurelle IRM</h1>
               <div className="grid-2">
                 <div className="glass-panel card">
-                  <h3 style={{ marginBottom: '1.5rem' }}>Upload Scan</h3>
-                  <div style={{ border: '2px dashed #ffffff', borderRadius: '0', height: '300px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                  <h3 style={{ marginBottom: '1.5rem' }}>Télécharger Scan</h3>
+                  <div 
+                    onDragOver={onDragOver}
+                    onDragLeave={onDragLeave}
+                    onDrop={onDrop}
+                    style={{ 
+                      border: isDragging ? '2px solid #ffffff' : '2px dashed #ffffff', 
+                      borderRadius: '0', 
+                      height: '300px', 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      position: 'relative', 
+                      overflow: 'hidden',
+                      background: isDragging ? 'rgba(255,255,255,0.1)' : 'transparent',
+                      transition: 'all 0.2s'
+                    }}
+                  >
                     {preview ? <img src={preview} alt="MRI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (
-                      <><Upload size={48} color="#a1a1aa" style={{ marginBottom: '1rem' }} /><p style={{ color: '#a1a1aa' }}>Upload MRI image</p></>
+                      <><Upload size={48} color="#a1a1aa" style={{ marginBottom: '1rem' }} /><p style={{ color: '#a1a1aa' }}>Télécharger ou Glisser l'image IRM</p></>
                     )}
                     <input type="file" onChange={handleFileChange} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }} />
                   </div>
+                  
+                  <div style={{ marginTop: '2rem' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#a1a1aa', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Exemples de Scans (Glisser-déposer ou cliquer)</p>
+                    <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                      {examples.map((ex, i) => (
+                        <div 
+                          key={i}
+                          draggable
+                          onDragStart={(e) => onDragStart(e, ex.path)}
+                          onClick={() => handleExampleSelect(ex.path)}
+                          style={{ 
+                            flex: '0 0 80px', 
+                            height: '80px', 
+                            border: '1px solid #333', 
+                            cursor: 'grab',
+                            position: 'relative',
+                            overflow: 'hidden'
+                          }}
+                        >
+                          <img 
+                            src={ex.path} 
+                            alt={ex.name} 
+                            className="example-item-img"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                          />
+                          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.7)', fontSize: '0.5rem', textAlign: 'center', padding: '2px' }}>{ex.name}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   <button className="btn btn-primary" style={{ marginTop: '1.5rem', width: '100%', justifyContent: 'center' }} onClick={runMriPrediction} disabled={loading || !mriFile}>
-                    {loading ? "Analyzing..." : "Start Diagnosis"}
+                    {loading ? "Analyse en cours..." : "Démarrer le Diagnostic"}
                   </button>
                 </div>
                 <div className="glass-panel card">
-                  <h3 style={{ marginBottom: '1.5rem' }}>Result</h3>
+                  <h3 style={{ marginBottom: '1.5rem' }}>Résultat</h3>
                   {mriResult ? (
                     <div className="animate-fade-in">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
                         <div style={{ padding: '1rem', border: '1px solid #ffffff' }}><Brain size={40} color="#ffffff" /></div>
                         <div>
-                          <p style={{ color: '#a1a1aa', fontSize: '0.75rem', letterSpacing: '0.1em' }}>DIAGNOSIS</p>
-                          <h2 style={{ fontSize: '2.5rem', fontWeight: 900 }}>{mriResult.diagnosis}</h2>
+                          <p style={{ color: '#a1a1aa', fontSize: '0.75rem', letterSpacing: '0.1em' }}>DIAGNOSTIC</p>
+                          <h2 style={{ fontSize: '2.5rem', fontWeight: 900 }}>{translateDiagnosis(mriResult.diagnosis)}</h2>
                         </div>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                        <span>Confidence</span>
+                        <span>Confiance</span>
                         <span className="badge badge-success">{(mriResult.confidence * 100).toFixed(1)}%</span>
                       </div>
                       <div style={{ background: '#333', height: '8px', marginTop: '1rem' }}>
@@ -173,7 +283,7 @@ const App = () => {
                   ) : (
                     <div style={{ textAlign: 'center', padding: '4rem 0', color: '#a1a1aa' }}>
                       <FileSearch size={48} style={{ marginBottom: '1rem', opacity: 0.3 }} />
-                      <p>Awaiting scan analysis</p>
+                      <p>En attente d'analyse</p>
                     </div>
                   )}
                 </div>
