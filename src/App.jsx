@@ -454,6 +454,105 @@ const App = () => {
               </div>
             </motion.div>
           )}
+          {activeTab === 'data' && (
+            <motion.div key="data" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+              <h1 className="font-heading" style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>About Data & AI Architecture</h1>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                <div className="glass-panel card">
+                  <h3 style={{ marginBottom: '1.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>1. Données d'Entraînement</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div>
+                      <h4 style={{ color: '#ffffff', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Dataset IRM Structural</h4>
+                      <p style={{ fontSize: '0.8rem', color: '#a1a1aa', lineHeight: '1.6', marginBottom: '0.5rem' }}>
+                        Utilisation d'un dataset de 6,400 images IRM classées en 4 stades : Non Dément, Très Légère Démence, Légère Démence, et Démence Modérée.
+                      </p>
+                      <a href="https://www.kaggle.com/datasets/preetpalsingh25/alzheimers-dataset-4-class-of-images" target="_blank" rel="noopener noreferrer" style={{ color: '#ffffff', fontSize: '0.75rem', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <Database size={12} /> Voir sur Kaggle (Images)
+                      </a>
+                    </div>
+                    <div>
+                      <h4 style={{ color: '#ffffff', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Dataset Clinique & Biomarqueurs</h4>
+                      <p style={{ fontSize: '0.8rem', color: '#a1a1aa', lineHeight: '1.6', marginBottom: '0.5rem' }}>
+                        Données tabulaires comprenant 16 paramètres critiques (MMSE, ADL, Cholestérol, etc.) issus de dossiers patients anonymisés.
+                      </p>
+                      <a href="https://www.kaggle.com/datasets/rabieelkharoua/alzheimers-disease-dataset" target="_blank" rel="noopener noreferrer" style={{ color: '#ffffff', fontSize: '0.75rem', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <Database size={12} /> Voir sur Kaggle (Tabular)
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="glass-panel card">
+                  <h3 style={{ marginBottom: '1.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>2. Modèles & Intelligence Artificielle</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div>
+                      <h4 style={{ color: '#ffffff', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Analyse IRM (Consensus)</h4>
+                      <ul style={{ fontSize: '0.8rem', color: '#a1a1aa', paddingLeft: '1.2rem', lineHeight: '1.6' }}>
+                        <li><strong>ResNet50 :</strong> Extracteur de caractéristiques profond pour le diagnostic primaire.</li>
+                        <li><strong>Custom CNN :</strong> Architecture séquentielle pour la vérification croisée.</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 style={{ color: '#ffffff', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Analyse Clinique & Care Plan</h4>
+                      <ul style={{ fontSize: '0.8rem', color: '#a1a1aa', paddingLeft: '1.2rem', lineHeight: '1.6' }}>
+                        <li><strong>SVM + Lasso :</strong> Pipeline optimisé pour la sélection de features et classification du risque.</li>
+                        <li><strong>K-Means & KNN :</strong> Clustering de similarité pour générer des recommandations de soins personnalisées.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="glass-panel card">
+                  <h3 style={{ marginBottom: '1.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>3. Entrées & Sorties (I/O)</h3>
+                  <table style={{ width: '100%', fontSize: '0.8rem', color: '#a1a1aa', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ textAlign: 'left', borderBottom: '1px solid #333' }}>
+                        <th style={{ padding: '0.5rem 0' }}>Composant</th>
+                        <th>Input</th>
+                        <th>Output</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr style={{ borderBottom: '1px solid #111' }}>
+                        <td style={{ padding: '0.75rem 0', color: '#ffffff' }}>IRM</td>
+                        <td>Image 224x224 RGB</td>
+                        <td>Stade + Confiance (%)</td>
+                      </tr>
+                      <tr style={{ borderBottom: '1px solid #111' }}>
+                        <td style={{ padding: '0.75rem 0', color: '#ffffff' }}>Clinique</td>
+                        <td>16 Paramètres Bio</td>
+                        <td>Probabilité de Risque</td>
+                      </tr>
+                      <tr>
+                        <td style={{ padding: '0.75rem 0', color: '#ffffff' }}>Care Plan</td>
+                        <td>Profil Patient</td>
+                        <td>Actions & Focus Recommandés</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="glass-panel card">
+                  <h3 style={{ marginBottom: '1.5rem', borderBottom: '1px solid #333', paddingBottom: '0.5rem' }}>4. Architecture & Technologies</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div>
+                      <p style={{ fontSize: '0.65rem', color: '#ffffff', fontWeight: 700, marginBottom: '0.4rem' }}>FRONTEND</p>
+                      <p style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>React / Vite / Framer Motion / Lucide Icons</p>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '0.65rem', color: '#ffffff', fontWeight: 700, marginBottom: '0.4rem' }}>BACKEND</p>
+                      <p style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>FastAPI / Python (Hébergé sur Hugging Face)</p>
+                    </div>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <p style={{ fontSize: '0.65rem', color: '#ffffff', fontWeight: 700, marginBottom: '0.4rem' }}>ML STACK</p>
+                      <p style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>TensorFlow / Keras / Scikit-Learn / Joblib / Pandas</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </main>
     </div>
